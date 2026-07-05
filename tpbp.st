@@ -33,9 +33,12 @@ defstruct wire {
   &wire
 }
 
+defcollection Children of StringIndex
+defcollection Wires of wire
 defstruct container-template <: collectable {
   StringIndex "name"
-  &Template
+  Children
+  Wires
 }
 defstruct leaf-template <: collectable {
   StringIndex "name"
@@ -57,8 +60,6 @@ defobj ėleaf {
   &outq
   λhandler
   λreset
-  λinstantiate
-  λinstall
 }
 
 defobj ėcontainer {
@@ -66,13 +67,11 @@ defobj ėcontainer {
   &outq
   λhandler
   λreset
-  λinstantiate
-  λinstall
   Children
   Wires
 }
 
-deflink ė ≡ [containeė | leafė]
+deflink ė ≡ [ėcontainer | ėleaf]
 
 
 defproc conditional-deliver {
@@ -122,7 +121,7 @@ defproc instantiate-part {
   containers <- reg.creg
   %traverse containers -> c {
     %if c.name == name {
-      >c.Template @instantiate-container
+      >(c.Children c.Wires) @instantiate-container
       %done
     }
   }
@@ -130,7 +129,7 @@ defproc instantiate-part {
   leaves <- reg.lreg
   %traverse leaves -> l {
     %if l.name == name {
-      >( l.handler l.reset l.instantiate l.install) @instantiate-leaf
+      >( l.handler l.reset ) @instantiate-leaf
       %done
     }
   }
@@ -139,7 +138,41 @@ defproc instantiate-part {
 }
 
 defproc instantiate-container {
+  c <- %fresh-ėcontainer
+  c.inq <- %fresh-queue
+  c.outq <- $fresh-queue
+  c.handler <- &'container-handler
+  c.reset   <- &'container-reset
+  c.Wires <- %pop
+  c.Children <- %pop
+  >c
 }
 
 defproc instantiate-leaf {
+  l <- %fresh-ėleaf
+  l.inq <- %fresh-queue
+  l.outq <- $fresh-queue
+  l.reset <- %pop
+  l.handler <- %pop
+  >l
+}
+
+###
+
+defproc container-handler {
+  # tos is a mev
+  <mev
+  >(mev %self %self) @deliver-atomically
+  %with-cause mev {
+    %while >%self @any-child-ready {
+      >%self @step-children
+    }
+  }
+}
+
+defproc container-reset {
+  # reset all children, recursively
+  %loop over container.Children -> child {
+    @child.reset
+  }
 }
