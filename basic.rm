@@ -1,0 +1,8 @@
+a reprogrammable machine (RM) is
+- a sequencer (CPU) 
+- an array of bytes
+- a pointer to a byte - synonymous with an index into the memory array of bytes
+- the sequencer sequences through the memory array using a pointer called PC, reads the byte ("opcode") pointed to by PC and uses it to index into a case statement that executes a code snippet specified by the opcode
+
+defbyte - reserve a memory cell (1 byte) and give it a name
+defptr  - reserve enough memory cells to index into memory ("pointer") and give it a name

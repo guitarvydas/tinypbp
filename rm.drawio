@@ -1,0 +1,45 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1">
+  <diagram name="reprogrammable machine" id="fWPSgmT_-7wUtVbJDKNG">
+    <mxGraphModel dx="1106" dy="675" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ZHgiid_XY8KBBD1x5-uO-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="320" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="ZHgiid_XY8KBBD1x5-uO-11" edge="1" parent="1" source="ZHgiid_XY8KBBD1x5-uO-2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;curved=0;" target="ZHgiid_XY8KBBD1x5-uO-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZHgiid_XY8KBBD1x5-uO-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="320" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="ZHgiid_XY8KBBD1x5-uO-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="320" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="ZHgiid_XY8KBBD1x5-uO-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="320" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="ZHgiid_XY8KBBD1x5-uO-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="..." vertex="1">
+          <mxGeometry height="20" width="40" x="320" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="ZHgiid_XY8KBBD1x5-uO-9" edge="1" parent="1" source="ZHgiid_XY8KBBD1x5-uO-6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;curved=0;" target="ZHgiid_XY8KBBD1x5-uO-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="370" />
+              <mxPoint x="250" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZHgiid_XY8KBBD1x5-uO-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;" value="Memory (array of bytes)" vertex="1">
+          <mxGeometry height="40" width="150" x="270" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ZHgiid_XY8KBBD1x5-uO-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="opcode interpreter&amp;nbsp;&lt;div&gt;(256 opcodes)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="280" width="170" x="480" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="ZHgiid_XY8KBBD1x5-uO-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="PC" vertex="1">
+          <mxGeometry height="40" width="80" x="440" y="350" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
