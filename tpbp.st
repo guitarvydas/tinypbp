@@ -58,6 +58,7 @@ defobj registry {
 defobj ėleaf {
   &inq
   &outq
+  high-priority
   λhandler
   λreset
 }
@@ -65,6 +66,8 @@ defobj ėleaf {
 defobj ėcontainer {
   &inq
   &outq
+  high-priority
+  ready-list
   λhandler
   λreset
   Children
@@ -94,13 +97,16 @@ defproc conditional-deliver {
       %case across:  { @receiver.enqueue-input new-mevent }
       %case through: { @receiver.enqueue-output new-mevent }
     }
+    >receiver @append-to-ready-list-of-container
 }
 
 defproc deliver-atomically {
   # loop through all wires of the given part, atomically, and fire each wire
   <( container source mev )
-  %loop over container.wires -> wire {
-    >( wire mev source ) @conditional-deliver
+  %with-container container {
+    %loop over container.wires -> wire {
+      >( wire mev source ) @conditional-deliver
+    }
   }
 }
 
@@ -145,6 +151,8 @@ defproc instantiate-container {
   c.reset   <- &'container-reset
   c.Wires <- %pop
   c.Children <- %pop
+  c.high-priority <- %false
+  c.ready-list <- %fresh-ready-list
   >c
 }
 
@@ -159,20 +167,31 @@ defproc instantiate-leaf {
 
 ###
 
-defproc container-handler {
-  # tos is a mev
-  <mev
-  >(mev %self %self) @deliver-atomically
-  %with-cause mev {
-    %while >%self @any-child-ready {
-      >%self @step-children
-    }
-  }
+defproc container-handler (self) {
+  ⋅ handle incoming mevent for a composite part (a "container")
+    ⋅⋅ $with-container (self)
+      ⋅⋅⋅ punt ![punt](tpbp-punt.drawio.svg) (which may cause internal events)
+           deliver-atomically (mev, top_container (), top_container ())
+      ⋅⋅⋅ step ![step](tpbp-step.drawio.svg) (step until no more internal events) 
+      	  ⋅⋅⋅⋅ $with-cause (mev)
+	     while any-child-ready (top_container ()) {
+	       step-ready-children (top_container ())
+	     }
+	   }
 }
 
-defproc container-reset {
-  # reset all children, recursively
-  %loop over container.Children -> child {
-    @child.reset
+⋅ defproc container-reset {
+  ⋅⋅reset all children, recursively, then clear own ready-list and input-queue {
+    $with-container $self {
+    ⋅⋅⋅ reset all children {
+        $loop over container.Children -> child {
+	  @child.reset
+        }
+      }
+    ⋅⋅⋅clear own ready-list and input-queue {
+	@$top-container.ready-list.clear
+	@$top-container.inq.clear
+      }
+    }
   }
 }
