@@ -16,15 +16,23 @@ defproc container-handler {
 
 
 
+⋅ leaf runtime object ![ėleaf][300](tinypbp-leaf-eh.drawio.svg)
+defobj ėleaf {
+  &inq
+  &outq
+  high-priority
+  λhandler
+  λreset
+}
 
 
 
 defproc container-handler (self) {
   ⋅ handle incoming mevent for a composite part (a "container")
     ⋅⋅ $with-container (self)
-      ⋅⋅⋅ punt ![punt](tpbp-punt.drawio.svg) (which may cause internal events)
+      ⋅⋅⋅ punt ![punt][200](tpbp-punt.drawio.svg) (which may cause internal events)
            deliver-atomically (mev, top_container (), top_container ())
-      ⋅⋅⋅ step ![step](tpbp-step.drawio.svg) (step until no more internal events) 
+      ⋅⋅⋅ step ![step][200](tpbp-step.drawio.svg) (step until no more internal events) 
       	  ⋅⋅⋅⋅ $with-cause (mev)
 	     while any-child-ready (top_container ()) {
 	       step-ready-children (top_container ())
@@ -38,9 +46,9 @@ defproc container-handler (self) {
 ⋅ defproc container-handler (mev) {
   ⋅⋅ handle incoming mevent for a composite part (a "container")
     ⋅⋅⋅ $with-container $self {
-      ⋅⋅⋅⋅ punt ![punt](tpbp-punt.drawio.svg) (which may cause internal events)
+      ⋅⋅⋅⋅ punt ![punt][200](tpbp-punt.drawio.svg) (which may cause internal events)
            @deliver-atomically (mev @top_container @top_container)
-      ⋅⋅⋅⋅ step ![step](tpbp-step.drawio.svg) (step until no more internal events) 
+      ⋅⋅⋅⋅ step ![step][200](tpbp-step.drawio.svg) (step until no more internal events) 
       	  ⋅⋅⋅⋅⋅ $with-cause (mev)
 	     while any-child-ready (top_container ()) {
 	       step-ready-children (top_container ())

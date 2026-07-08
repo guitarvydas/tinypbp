@@ -19,10 +19,20 @@ defbyte SenderPortIX
 defbyte ReceiverIX
 defbyte ReceiverPortIX
 
-defstruct name {
+defstruct Name <: collectable {
   StringIndex
-  &name
 }
+
+defstruct inport <: collectable {
+  StringIndex
+}
+
+defstruct outport <: collectable {
+  StringIndex
+}
+
+defcollection InputPorts of inport
+defcollection OutputPorts of outport
 
 defstruct wire {
   Dir
@@ -40,13 +50,34 @@ defstruct container-template <: collectable {
   Children
   Wires
 }
+
+⋅ leaf template ![leaf template][200](tinypbp-leaf-part-template.drawio.svg)
 defstruct leaf-template <: collectable {
-  StringIndex "name"
+  Name
+  InputPorts
+  OutputPorts
   λhandler
   λreset
   λinstantiate
   λinstall
 }
+
+⋅ container template ![container template][200](tinypbp-container-part-template.drawio.svg)
+defstruct generic-container <: collectable {
+  λhandler
+  λreset
+  λinstantiate
+  λinstall
+}
+
+defstruct container-template <: collectable <:generic-container {
+  Name
+  InputPorts
+  OutputPorts
+  Children
+  Wires
+}
+
 
 defcollection creg of container-template
 defcollection lreg of leaf-template
@@ -55,6 +86,7 @@ defobj registry {
   lreg
 }
 
+⋅ leaf runtime object ![ėleaf][200](tinypbp-leaf-eh.drawio.svg)
 defobj ėleaf {
   &inq
   &outq
@@ -63,6 +95,7 @@ defobj ėleaf {
   λreset
 }
 
+⋅ container runtime object ![ėcontainer][200](tinypbp-container-eh.drawio.svg)
 defobj ėcontainer {
   &inq
   &outq
@@ -77,9 +110,8 @@ defobj ėcontainer {
 deflink ė ≡ [ėcontainer | ėleaf]
 
 
-defproc conditional-deliver {
+defproc conditional-deliver (source mev wire){
   # deliver the mevent to the receiver specified in the wire if the source matches the sender in the wire
-  <( source mev wire )
   mev.port -> outport
   mev.payload -> payload
   wire.dir -> dir
@@ -97,7 +129,9 @@ defproc conditional-deliver {
       %case across:  { @receiver.enqueue-input new-mevent }
       %case through: { @receiver.enqueue-output new-mevent }
     }
-    >receiver @append-to-ready-list-of-container
+    $with-container receiver {
+      @append-to-ready-list-of-container
+    }
 }
 
 defproc deliver-atomically {
@@ -167,30 +201,30 @@ defproc instantiate-leaf {
 
 ###
 
-defproc container-handler (self) {
-  ⋅ handle incoming mevent for a composite part (a "container")
-    ⋅⋅ $with-container (self)
-      ⋅⋅⋅ punt ![punt](tpbp-punt.drawio.svg) (which may cause internal events)
+⋅ defproc container-handler (self) {
+  ⋅⋅ handle incoming mevent for a composite part (a "container")
+    ⋅⋅⋅ $with-container (self)
+      ⋅⋅⋅⋅ punt ![punt][200](tpbp-punt.drawio.svg) (which may cause internal events)
            deliver-atomically (mev, top_container (), top_container ())
-      ⋅⋅⋅ step ![step](tpbp-step.drawio.svg) (step until no more internal events) 
-      	  ⋅⋅⋅⋅ $with-cause (mev)
-	     while any-child-ready (top_container ()) {
-	       step-ready-children (top_container ())
+      ⋅⋅⋅⋅ step ![step][200](tpbp-step.drawio.svg) (step until no more internal events) 
+      	  ⋅⋅⋅⋅⋅ $with-cause (mev)
+	     while any-child-ready (@top_container) {
+	       step-ready-children (@top_container))
 	     }
 	   }
 }
 
-⋅ defproc container-reset {
+⋅ defproc container-reset (self) {
   ⋅⋅reset all children, recursively, then clear own ready-list and input-queue {
-    $with-container $self {
+    $with-container self {
     ⋅⋅⋅ reset all children {
-        $loop over container.Children -> child {
+        $loop over (@top_container).Children -> child {
 	  @child.reset
         }
       }
     ⋅⋅⋅clear own ready-list and input-queue {
-	@$top-container.ready-list.clear
-	@$top-container.inq.clear
+	@(@top-container).ready-list.clear
+	@(@top-container).inq.clear
       }
     }
   }

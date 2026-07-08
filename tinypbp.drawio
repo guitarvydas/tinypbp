@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1" pages="6">
   <diagram name="mevent" id="aV-YELEuLaKReogAPmi0">
-    <mxGraphModel dx="1783" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="1325" dy="714" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -46,8 +46,8 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram name="Leaf part template" id="bJi8nVRru1Ot6y1jc2-A">
-    <mxGraphModel dx="1325" dy="761" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+  <diagram name="leaf-part-template" id="bJi8nVRru1Ot6y1jc2-A">
+    <mxGraphModel dx="1325" dy="714" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="HsD28O9StjcyfjQLhke1-0" />
         <mxCell id="HsD28O9StjcyfjQLhke1-1" parent="HsD28O9StjcyfjQLhke1-0" />
@@ -129,7 +129,7 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram name="Container part" id="188fPg9FAl7xYpGfWKkg">
+  <diagram name="container-part-template" id="188fPg9FAl7xYpGfWKkg">
     <mxGraphModel dx="1325" dy="714" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="5_8vvq87I6XXA8Rs85ZU-0" />
@@ -363,7 +363,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="djcqHztqCNjEKarF6dRg" name="template-registry">
-    <mxGraphModel dx="1783" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="1325" dy="714" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -394,8 +394,8 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram id="cg08lgwmu0OvG2YPrMGC" name="Leaf ė">
-    <mxGraphModel dx="1783" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+  <diagram id="cg08lgwmu0OvG2YPrMGC" name="leaf-eh">
+    <mxGraphModel dx="1325" dy="714" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -438,8 +438,8 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram name="Container ė" id="XrGtR2hCV-jdMUsmOP0c">
-    <mxGraphModel dx="1325" dy="761" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+  <diagram name="container-eh" id="XrGtR2hCV-jdMUsmOP0c">
+    <mxGraphModel dx="1325" dy="714" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="ND_wtDQXGdYTS1Go0EAB-0" />
         <mxCell id="ND_wtDQXGdYTS1Go0EAB-1" parent="ND_wtDQXGdYTS1Go0EAB-0" />

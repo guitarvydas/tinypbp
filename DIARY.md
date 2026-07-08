@@ -46,3 +46,8 @@ def push_mevent (parent,receiver,inq,m):               #line 287
 - add high-priority
 - add %fresh-ready-list
 - documentation levels .xxx{..yyy{...zzz{}}}
+
+--- JUly 8, 2026 ---
+
+- decide to keep high level syntax more Python-like
+- use `$with-container (self)` to mean to push `self` onto a pre-existing stack that contains only containers (which avoids needing to pass-through the self argument to functions to deeper functions)
