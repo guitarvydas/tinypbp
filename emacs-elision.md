@@ -516,3 +516,378 @@ Add a second optional `[N]` bracket group before the path, matching only digits,
 What changed in the regex: `\\(?:\\[\\([0-9]+\\)\\]\\)?` is a shy (non-capturing) wrapper making the whole `[400]` chunk optional, while the digits inside still form a real capture group. That shifts the group numbering — alt text is still group 1, but width is now group 2 and path moves to group 3 (previously path was group 2). `(match-string 2)` comes back as `nil` when `[width]` is absent, which is exactly the "missing means default" check you wanted; when present, it's converted from string to number and passed straight through as `:max-width`.
 
 `my-dsl-remove-images` and `image-flush` usage are unchanged from before — this only touches the parsing and the `:max-width` value fed to `create-image`.
+
+--
+
+to be noted and not acted upon at this moment: I am replacing `my-dsl-` with `st-`
+
+---
+
+what code do I need to add to emacs' `init.el` to bind the key command-1 (meta-1) to execute `(outline-hide-sublevels 1)`
+
+---
+
+```elisp
+(defun st-outline-hide-level-1 ()
+  "Fold the buffer to outline level 1."
+  (interactive)
+  (outline-hide-sublevels 1))
+
+(global-set-key (kbd "M-1") #'st-outline-hide-level-1)
+```
+
+`"M-1"` is Meta-1 in Emacs' kbd notation — on your setup, where Command already acts as Meta (`mac-command-modifier` set to `'meta`), that's Command-1 as you want it.
+
+One thing to flag: `M-1` is normally bound globally to `digit-argument`, part of how `M-1`, `M-2`, etc. let you type a numeric prefix argument (e.g. `M-5 M-x foo`). Rebinding it globally means you lose that shortcut everywhere, not just in outline buffers. If you'd rather keep `M-1` free for prefix args elsewhere and only fold outlines with it in relevant buffers, bind it in `outline-minor-mode-map` instead:
+
+```elisp
+(with-eval-after-load 'outline
+  (define-key outline-minor-mode-map (kbd "M-1") #'st-outline-hide-level-1))
+```
+
+That only takes effect in buffers where `outline-minor-mode` is on, leaving `M-1` alone everywhere else.
+
+---
+can I write the following binding more concisely?
+```
+(defun st-outline-hide-level-1 ()
+  "Fold the buffer to outline level 1."
+  (interactive)
+  (outline-hide-sublevels 1))
+(with-eval-after-load 'outline
+  (define-key outline-minor-mode-map (kbd "M-1") #'st-outline-hide-level-1))
+```
+---
+
+```elisp
+(with-eval-after-load 'outline
+  (define-key outline-minor-mode-map (kbd "M-1")
+    (lambda () (interactive) (outline-hide-sublevels 1))))
+```
+
+Drops the separate `defun` — the lambda goes directly where the function symbol was. Trade-off: an anonymous lambda doesn't get a name, so it won't show up in `M-x`, `apropos`, or carry a docstring the way `st-outline-hide-level-1` did. Fine for a pure keybinding-only command; worth keeping the named `defun` if you ever want to invoke it by name or document it.
+
+---
+how do I display the code (the undotted `deliver-atomically ...` and `while ...`) in the following?
+```
+⋅ defproc container-handler (self) {
+  ⋅⋅ handle incoming mevent for a composite part (a "container")
+      ⋅⋅⋅ punt incoming mevent down to each child connected to the input
+      ⋅⋅⋅ then cause each child to step once and react to the mevent
+      ⋅⋅⋅ this might cause the children to generate more mevents internal to the container
+      ⋅⋅⋅ so, loop and recursively step all children until internal mevents have died down (quiescence)
+      ⋅⋅⋅ i.e. such that all internal reactions to this single incoming mevent have quiesced
+      ⋅⋅⋅ ![punt][200](tpbp-punt.drawio.svg)
+      ⋅⋅⋅⋅. $with-container (self)
+           deliver-atomically (mev, top_container (), top_container ())
+      ⋅⋅⋅ step until quiescense
+      ⋅⋅⋅ ![step][200](tpbp-step.drawio.svg)
+      	  ⋅⋅⋅⋅ $with-cause (mev)
+	     while any-child-ready (@top_container) {
+	       step-ready-children (@top_container))
+	     }
+	   }
+}
+
+```
+
+---
+
+The reason the code stays hidden even once you've folded down to the right heading depth: `outline-hide-sublevels N` always hides the *body* text of every visible heading, no matter how deep N goes — it only ever reveals heading lines, never the text sitting under them. Since your `deliver-atomically (...)` and `while (...) {...}` lines aren't headings themselves (no leading `⋅`), they're just body text attached to the `⋅⋅⋅⋅` heading above them, so they're hidden right along with everything else at that level.
+
+To reveal them, use `outline-show-entry` with point on (or inside) that `⋅⋅⋅⋅` heading — it shows the body text immediately following a heading, up to the next heading of equal-or-shallower depth, without touching anything deeper elsewhere in the buffer:
+
+```elisp
+M-x outline-show-entry
+```
+
+Since these `⋅⋅⋅⋅` headings have no further sub-headings under them (the code is the last thing there), `outline-show-entry` is exactly enough — there's nothing "deeper" left to accidentally expose.
+
+If you're using `outline-cycle`/TAB at point on that heading, it should get you there too, cycling through folded → children-shown → fully-shown; since there are no child headings to show, one or two presses lands on "fully shown," which reveals the code.
+
+If you want a dedicated key for this (paired with your `M-1`/`M-2`/`M-3` depth bindings), wrap it:
+
+```elisp
+(defun st-outline-reveal-code ()
+  "Show the body text (code) under the heading at point."
+  (interactive)
+  (outline-show-entry))
+
+(with-eval-after-load 'outline
+  (define-key outline-minor-mode-map (kbd "M-0") #'st-outline-reveal-code))
+```
+
+That gives you `M-1`/`M-2`/`M-3` to pick how much annotation hierarchy to show, and `M-0` to drop into the actual code wherever point currently sits.
+
+---
+
+how do I hide all lines that are marked as architectural comments? An architectural comment begins with leading spaces and `⋅`
+
+---
+
+```elisp
+(defvar st-arch-comment-regexp "^[ \t]*⋅"
+  "Matches an architectural-comment line: leading whitespace then ⋅.")
+
+(defvar st-arch-comment-symbol 'st-arch-comment)
+
+(defun st-hide-arch-comments ()
+  "Hide all architectural-comment lines (leading ⋅), keeping only code visible."
+  (interactive)
+  (add-to-invisibility-spec st-arch-comment-symbol)   ; no ellipsis
+  (remove-overlays (point-min) (point-max) 'st-arch-comment t)
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward st-arch-comment-regexp nil t)
+      (let* ((beg (line-beginning-position))
+             (end (min (point-max) (1+ (line-end-position))))
+             (ov (make-overlay beg end)))
+        (overlay-put ov 'st-arch-comment t)
+        (overlay-put ov 'invisible st-arch-comment-symbol)))))
+
+(defun st-show-arch-comments ()
+  "Undo `st-hide-arch-comments'."
+  (interactive)
+  (remove-from-invisibility-spec st-arch-comment-symbol)
+  (remove-overlays (point-min) (point-max) 'st-arch-comment t))
+
+(defun st-toggle-arch-comments ()
+  (interactive)
+  (if (memq st-arch-comment-symbol buffer-invisibility-spec)
+      (st-show-arch-comments)
+    (st-hide-arch-comments)))
+```
+
+Same overlay-plus-invisibility-spec mechanism as your earlier dot-line hider, renamed to the `st-` convention and matching your current `⋅` marker. This is a flat filter (any line starting with `⋅`, regardless of nesting depth) rather than the depth-based `outline-hide-sublevels` folding — so it's a separate axis: use `M-1`/`M-2`/`M-3` to control how much of the annotation *hierarchy* shows, or `st-toggle-arch-comments` to strip all annotation lines at once and see just the raw code, undotted lines untouched either way.
+---
+
+I want to bind M-9 to toggle between hiding all architectural comments and showing everything.
+
+---
+```elisp
+(with-eval-after-load 'outline
+  (define-key outline-minor-mode-map (kbd "M-9") #'st-toggle-arch-comments))
+```
+
+Same pattern as your `M-1`/`M-0` bindings — scoped to `outline-minor-mode-map` so it only takes effect in buffers where outline-minor-mode is on, leaving `M-9`'s default `digit-argument` (numeric prefix arg) intact everywhere else.
+---
+
+The M-9 toggling shows only code lines that have been uncovered by M-0. When ON, it should show all non-architectural lines, when OFF it should show all lines AL and non-AL (where `AL` is shorthand for `architectural line`)
+
+---
+
+The bug: `outline-show-entry` (`M-0`) only reveals code that outline itself has un-folded at that point. `st-hide-arch-comments` never touched outline's own hiding — it only added/removed the `st-arch-comment` invisibility symbol — so any code still sitting under a folded heading stayed invisible regardless of the AL toggle. Fix: have the toggle also force outline to reveal everything first, then let AL-hiding take over as the only filter in play.
+
+```elisp
+(defun st-hide-arch-comments ()
+  "Show only non-architectural (code) lines."
+  (interactive)
+  (outline-show-all)                      ; clear any outline folding first
+  (add-to-invisibility-spec st-arch-comment-symbol)
+  (remove-overlays (point-min) (point-max) 'st-arch-comment t)
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward st-arch-comment-regexp nil t)
+      (let* ((beg (line-beginning-position))
+             (end (min (point-max) (1+ (line-end-position))))
+             (ov (make-overlay beg end)))
+        (overlay-put ov 'st-arch-comment t)
+        (overlay-put ov 'invisible st-arch-comment-symbol)))))
+
+(defun st-show-arch-comments ()
+  "Show everything: AL and non-AL lines alike."
+  (interactive)
+  (remove-from-invisibility-spec st-arch-comment-symbol)
+  (remove-overlays (point-min) (point-max) 'st-arch-comment t)
+  (outline-show-all))
+
+(defun st-toggle-arch-comments ()
+  (interactive)
+  (if (memq st-arch-comment-symbol buffer-invisibility-spec)
+      (st-show-arch-comments)
+    (st-hide-arch-comments)))
+```
+
+With `outline-show-all` run first, every code line is unconditionally visible before the AL-hiding overlay pass runs, so ON shows all code regardless of prior `M-0`/`M-1`/`M-2`/`M-3` state, and OFF shows literally everything.
+
+Side effect worth knowing: since `outline-show-all` fully expands the outline, toggling `M-9` resets whatever heading fold depth you'd set with `M-1`/`M-2`/`M-3` — pressing `M-9` twice gets you back to "everything visible," not back to your previous fold level. If you want that fold state preserved across the toggle, it'd need to be captured and restored explicitly (e.g. remembering the last `outline-hide-sublevels` argument and reapplying it in `st-show-arch-comments` instead of calling `outline-show-all`); say if that's what you want and I'll adjust it.
+
+---
+
+rewinding to the beginning and starting from scratch (deleting all elisp code developed thus far):
+in the st-mode, for the whole buffer: I want outlining-mode turned on, I want all images to display, 
+M-1 should show only lines with AL level 1
+M-2 should show only lines with AL level 2 or lower (e.g. 1 and 2)
+M-3 should show only lines with AL level 3 or lower
+M-4 should show only lines with AL level 4 or lower
+M-5 should show only lines with AL level 5 or lower
+M-6 should show only lines with AL level 6 or lower
+M-7 should show only lines with AL level 7 or lower
+M-8 should show only lines with AL level 8 or lower
+M-9 should show only lines with AL level 9 or lower
+M-0 should toggle between showing everything and only non-AL lines
+everywhere in the buffer
+
+---
+
+Fresh, self-contained `st-mode` covering all of this — outline recognition, image display, and the M-1…M-9 / M-0 bindings, replacing everything built up earlier. Needs `lexical-binding: t` at the top of whatever file this lives in, since the M-1…M-9 bindings are built via a loop of closures each capturing a different N.
+
+```elisp
+;;; -*- lexical-binding: t; -*-
+
+(defvar st-al-char "⋅"
+  "Character marking an architectural line (AL).")
+
+(defvar st-default-image-width 400)
+
+(defun st--line-al-level ()
+  "AL level of the current line: count of leading ⋅ after whitespace, 0 if none."
+  (save-excursion
+    (beginning-of-line)
+    (skip-chars-forward " \t")
+    (let ((start (point)))
+      (skip-chars-forward st-al-char)
+      (- (point) start))))
+
+;; --- images ---
+
+(defun st-remove-images ()
+  (interactive)
+  (remove-overlays (point-min) (point-max) 'st-image t))
+
+(defun st-display-images ()
+  "Render ![alt][width](path) links as inline images."
+  (interactive)
+  (st-remove-images)
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward
+            "!\\[\\([^]]*\\)\\]\\(?:\\[\\([0-9]+\\)\\]\\)?(\\([^)]+\\))"
+            nil t)
+      (let* ((width (if (match-string 2)
+                         (string-to-number (match-string 2))
+                       st-default-image-width))
+             (path (match-string 3))
+             (full-path (expand-file-name
+                         path (file-name-directory (or buffer-file-name default-directory))))
+             (beg (match-beginning 0))
+             (end (match-end 0)))
+        (when (and (file-exists-p full-path)
+                   (image-type-available-p 'svg))
+          (let* ((img (create-image full-path 'svg nil :max-width width))
+                 (ov (make-overlay beg end)))
+            (image-flush img)
+            (overlay-put ov 'st-image t)
+            (overlay-put ov 'display img)))))))
+
+;; --- level-based line visibility (M-1..M-9, M-0) ---
+
+(defvar st-level-invisible-symbol 'st-level-hidden)
+(defvar-local st--non-al-only nil)
+
+(defun st--hide-region (beg end)
+  (let ((ov (make-overlay beg end)))
+    (overlay-put ov 'st-level-overlay t)
+    (overlay-put ov 'invisible st-level-invisible-symbol)))
+
+(defun st-clear-level-overlays ()
+  (remove-overlays (point-min) (point-max) 'st-level-overlay t))
+
+(defun st-show-level (n)
+  "Show only AL lines with level 1..N; hide deeper AL lines and all non-AL lines."
+  (setq st--non-al-only nil)
+  (add-to-invisibility-spec st-level-invisible-symbol)
+  (st-clear-level-overlays)
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (let ((level (st--line-al-level)))
+        (unless (and (> level 0) (<= level n))
+          (st--hide-region (line-beginning-position)
+                            (min (point-max) (1+ (line-end-position))))))
+      (forward-line 1))))
+
+(defun st-show-everything ()
+  (remove-from-invisibility-spec st-level-invisible-symbol)
+  (st-clear-level-overlays))
+
+(defun st-show-only-non-al ()
+  (add-to-invisibility-spec st-level-invisible-symbol)
+  (st-clear-level-overlays)
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (when (> (st--line-al-level) 0)
+        (st--hide-region (line-beginning-position)
+                          (min (point-max) (1+ (line-end-position)))))
+      (forward-line 1))))
+
+(defun st-toggle-non-al ()
+  "M-0: toggle between showing everything and showing only non-AL lines."
+  (interactive)
+  (if st--non-al-only
+      (progn (st-show-everything) (setq st--non-al-only nil))
+    (st-show-only-non-al)
+    (setq st--non-al-only t)))
+
+;; --- keymap & mode ---
+
+(defvar st-mode-map
+  (let ((map (make-sparse-keymap)))
+    (dotimes (i 9)
+      (let ((n (1+ i)))
+        (define-key map (kbd (format "M-%d" n))
+          (lambda () (interactive) (st-show-level n)))))
+    (define-key map (kbd "M-0") #'st-toggle-non-al)
+    map)
+  "Keymap for `st-mode'.")
+
+(define-minor-mode st-mode
+  "Minor mode for architecturally-annotated code with leveled folding."
+  :lighter " ST"
+  :keymap st-mode-map
+  (when st-mode
+    (setq-local outline-regexp (concat "[ \t]*" (regexp-quote st-al-char) "+"))
+    (setq-local outline-level #'st--line-al-level)
+    (outline-minor-mode 1)
+    (st-display-images)))
+```
+
+How it matches your spec: `M-N` (1–9) shows exactly the AL lines at level 1 through N and hides everything else — deeper AL lines and all non-AL/code lines alike — a flat classification computed per-line, not outline's own body-hiding. `M-0` is a separate, self-tracked toggle (`st--non-al-only`) between "everything visible" and "only non-AL lines visible," independent of whatever `M-N` last did, so it always behaves as a clean two-state flip. Turning on `st-mode` enables `outline-minor-mode` (with `outline-regexp`/`outline-level` wired to the same ⋅-counting logic, so TAB-cycling and other outline commands still recognize your headings) and immediately renders any `![alt][width](path)` images in the buffer.
+
+Enable it in a buffer with `M-x st-mode`, or hook it to whatever major mode you're editing this DSL in, e.g. `(add-hook 'js-mode-hook #'st-mode)` if scoped appropriately per your earlier concern about `js-mode` collisions.
+
+---
+
+it appears that `(st-show-level ...)` needs a `(format ...)` also in `st-mod-map`
+
+---
+
+Good catch — the lambda-based keymap only works correctly if `lexical-binding: t` is genuinely active for the buffer, which only happens if that cookie is the literal first line of the whole file. Paste this snippet partway into an existing `init.el` and the cookie does nothing, so all nine `M-N` lambdas end up capturing the same (last) value of `n` instead of their own.
+
+Cleaner fix: generate nine actual named functions with the level number spliced in as a literal, using `format`/`intern`, rather than relying on lambda closures at all. This works regardless of lexical-binding:
+
+```elisp
+(dotimes (i 9)
+  (let ((n (1+ i)))
+    (eval
+     `(defun ,(intern (format "st-show-level-%d" n)) ()
+        ,(format "Show only AL lines with level <= %d." n)
+        (interactive)
+        (st-show-level ,n)))))
+
+(defvar st-mode-map
+  (let ((map (make-sparse-keymap)))
+    (dotimes (i 9)
+      (let ((n (1+ i)))
+        (define-key map (kbd (format "M-%d" n))
+          (intern (format "st-show-level-%d" n)))))
+    (define-key map (kbd "M-0") #'st-toggle-non-al)
+    map)
+  "Keymap for `st-mode'.")
+```
+
+Replace the earlier `st-mode-map` definition (the one with `lambda` inside `dotimes`) with these two forms. The `` ` `` (backquote) with `,n` splices the actual number into the generated `defun` body at the time `eval` runs, so `st-show-level-3`'s body literally contains `(st-show-level 3)` as a constant — no variable capture involved, so no closure/lexical-scoping bug is possible. The `define-key` loop was already safe (no lambdas there), but now it looks up the distinct named function per level via `intern`, matching the `format` you were expecting to see.
+
+Everything else in `st-mode` (image display, outline setup, `st-toggle-non-al`) is unchanged.
+

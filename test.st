@@ -1,73 +1,21 @@
-defproc container-handler {
-  .handle incoming mevent for a composite part (a "container")
-    ..%with-container %self
-      ...punt mevent to children
-         {
-	   # tos is a mev
-	   <mev
-           >(mev %top-container %top-container) @deliver-atomically
-      ...step children recursively until quiescence
-      	  ....%with-cause mev {
-	     %while >%top-container @any-child-ready {
-	       >%top-container @step-ready-children
-	     }
-	   }
-}
-
-
-
-⋅ leaf runtime object ![ėleaf][300](tinypbp-leaf-eh.drawio.svg)
-defobj ėleaf {
-  &inq
-  &outq
-  high-priority
-  λhandler
-  λreset
-}
-
-
-
 defproc container-handler (self) {
-  ⋅ handle incoming mevent for a composite part (a "container")
-    ⋅⋅ $with-container (self)
-      ⋅⋅⋅ punt ![punt][200](tpbp-punt.drawio.svg) (which may cause internal events)
-           deliver-atomically (mev, top_container (), top_container ())
-      ⋅⋅⋅ step ![step][200](tpbp-step.drawio.svg) (step until no more internal events) 
-      	  ⋅⋅⋅⋅ $with-cause (mev)
-	     while any-child-ready (top_container ()) {
-	       step-ready-children (top_container ())
-	     }
-	   }
-}
-
-
-
-
-⋅ defproc container-handler (mev) {
+⋅container-handler (self)
   ⋅⋅ handle incoming mevent for a composite part (a "container")
-    ⋅⋅⋅ $with-container $self {
-      ⋅⋅⋅⋅ punt ![punt][200](tpbp-punt.drawio.svg) (which may cause internal events)
-           @deliver-atomically (mev @top_container @top_container)
-      ⋅⋅⋅⋅ step ![step][200](tpbp-step.drawio.svg) (step until no more internal events) 
-      	  ⋅⋅⋅⋅⋅ $with-cause (mev)
-	     while any-child-ready (top_container ()) {
-	       step-ready-children (top_container ())
-	     }
-	   }
+      ⋅⋅⋅ punt incoming mevent down to each child connected to the input
+      ⋅⋅⋅ then cause each child to step once and react to the mevent
+      ⋅⋅⋅ this might cause the children to generate more mevents internal to the container
+      ⋅⋅⋅ so, loop and recursively step all children until internal mevents have died down (quiescence)
+      ⋅⋅⋅ i.e. such that all internal reactions to this single incoming mevent have quiesced
+      ⋅⋅⋅⋅ ![punt][200](tpbp-punt.drawio.svg)
+        $with-container (self) {
+           deliver-atomically (mev, @top-container, @top-container)
+      ⋅⋅⋅⋅⋅ step until quiescense
+      ⋅⋅⋅⋅⋅⋅ ![step][200](tpbp-step.drawio.svg)
+           $with-cause (mev) {
+             while any-child-ready (@top-container) {
+               step-ready-children (@top-container)
+             }
+           }
+        }
 }
 
-⋅ defproc container-reset {
-  ⋅⋅reset all children, recursively, then clear own ready-list and input-queue {
-    $with-container $self {
-    ⋅⋅⋅ reset all children {
-        $loop over container.Children -> child {
-	  @child.reset
-        }
-      }
-    ⋅⋅⋅clear own ready-list and input-queue {
-	@$top-container.ready-list.clear
-	@$top-container.inq.clear
-      }
-    }
-  }
-}
