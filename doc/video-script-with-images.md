@@ -98,4 +98,4 @@ And here, I hit the toggle key to turn off all architectural comments, showing o
 
 We already saw this code at the beginning of this presentation, but now we have a better idea of why the code was written this way.
 
-If I want to study the code some more, I can continue to hit hot keys to turn on various architectural layers as needed.
+If I wanted to study the code some more, I could continue to hit hot keys to turn on various architectural layers as needed.
