@@ -1,4 +1,4 @@
-defproc container-handler (self) {
+$defproc container-handler (self) {
 ⋅container-handler (self)
   ⋅⋅ handle incoming mevent for a composite part (a "container")
       ⋅⋅⋅ punt incoming mevent down to each child connected to the input

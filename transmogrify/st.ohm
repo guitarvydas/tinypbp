@@ -1,0 +1,23 @@
+st {
+  main = applySyntactic<Defproc>
+  Defproc = "$defproc" id "(" id* ")" "{" innards "}"
+  innards = innard*
+  innard =
+    | space+ -- spaces
+    | architecturalComment nl -- architecturalcomment
+    | builtin -- builtin
+    | "{" innards "}" -- rec
+    | ~acLH ~biLH ~"}" any -- other
+  builtin =
+    | biLH "with-container" builtintail -- withcontainer
+    | biLH "with-cause" builtintail -- withcause
+  builtintail = spaces "(" spaces id spaces ")" spaces "{" innards "}"
+  // acLH means architectural comment Left Handle
+  architecturalComment = acLH (~nl any)*
+  acLH =  "⋅"+
+  biLH = "$" 
+  id = firstLetter followLetter*
+  firstLetter = letter | "-" | "_" 
+  followLetter = alnum | "-" | "_"
+  nl = "\n"
+}
