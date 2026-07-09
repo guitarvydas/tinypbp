@@ -10,7 +10,7 @@ In this video, I'll just show a simple technique for writing an architectural de
 
 Then we can look at the code to see how it maps to the Design Intent (DI) of the architect.
 
-I imagine that in the future we might invent a more precise language to describe architecture with, like the Parts Based Programming (PBP) stuff I describe elsewhere, but, for this video we'll just use English and some SVG pictures.
+I imagine that in the future we might invent several more precise languages to describe architecture with, like the Parts Based Programming (PBP) stuff I describe elsewhere, but, for this video we'll just use English and some SVG pictures.
 
 ---
 
@@ -23,7 +23,7 @@ To figure that out, we are used to reading the code and reverse-engineering why 
 ---
 I've been trying to re-create the reference version of the Parts Based Programming (PBP) kernel.
 
-I'm inventing a meta-language on the fly that is intended to emit Python code, and code in other languages like Javascript, Odin, etc. The meta-language is like Python with braces along with a few keywords that begin with `$` and `@`. You don't need to understand the meta-language at this point. I only want to show how to use layers to describe an architecture by spiralling into it in a layered manner.
+I'm inventing a meta-language on the fly that is intended to emit Python code, and to emit code in other languages like Javascript, Odin, etc. The meta-language is like Python with braces along with a few keywords that begin with `$` and `@`. You don't need to understand the meta-language at this point. I only want to show how to use layers to describe an architecture by spiralling into it in a layered manner.
 
 I've been writing comments in ASCII text to explain what's going on, and what the meta-code is meant to accomplish, but it would be easier to explain in stages and to use diagrams.
 
@@ -32,7 +32,7 @@ I am drawing SVG diagrams using drawio and I've asked Claude to write elisp code
 ---
 [display M-1 view]
 ![](1.png)
-Here's an interim snippet of meta code. The algorithm that I want to describe is called `container-handler` and takes one parameter `self` that's defined elsewhere.
+Here's an interim snippet of meta code. The algorithm that I want to describe is called `container-handler`. It takes one parameter `self` that's defined elsewhere.
 
 ---
 [M-2]
@@ -79,12 +79,12 @@ and show what I mean in the next level down
 [M-6]
 
 ![](6.png)
-The diagram shows that the incoming mevent caused a reaction from two inner parts which then sent two more mevents which then generated two more mevents which get fanned into the output of the composite part.
+The diagram shows that the incoming mevent caused a reaction from two inner parts which then sent two more mevents which then generated two more mevents which got fanned out into the output of the composite part.
 
 Again, the diagram says this better than my words.
 
 ---
-[M-0]
+`[M-0] [M-0]`
 
 ![](7.png)
 Here, I've hit the key to show all architectural comments with code embedded within them.
@@ -96,6 +96,6 @@ Here, I've hit the key to show all architectural comments with code embedded wit
 
 And here, I hit the toggle key to turn off all architectural comments, showing only the code.
 
-We already say this code at the beginning of this presentation, but now we have a better idea of why the code was written this way.
+We already saw this code at the beginning of this presentation, but now we have a better idea of why the code was written this way.
 
 If I want to study the code some more, I can continue to hit hot keys to turn on various architectural layers as needed.
